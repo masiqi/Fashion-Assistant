@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>穿搭推荐</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="text/javascript">
+        window._AMapSecurityConfig = {
+		securityJsCode:'{$key}',
+        }
+  </script>
+  <script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.15&key=$$key"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="weather-info">
+      <h2>今日天气</h2>
+      <p id="weatherInfo"></p>
+    </div>
+    <div class="form">
+      <h2>请输入信息</h2>
+      <form>
+        <div class="form-group">
+          <label for="gender">性别：</label>
+          <input type="text" id="gender" name="gender" value="女">
+        </div>
+        <div class="form-group">
+          <label for="age">年龄：</label>
+          <input type="text" id="age" name="age" value="20">
+        </div>
+        <div class="form-group">
+          <label for="scene">应用场景：</label>
+          <input type="text" id="scene" name="scene" value="上班">
+        </div>
+        <div class="form-group">
+          <label for="color">颜色偏好：</label>
+          <input type="text" id="color" name="color">
+        </div>
+        <div class="form-group">
+          <input type="submit" value="提交">
+        </div>
+      </form>
+    </div>
+    <div class="outfit">
+      <h2>穿搭推荐：</h2>
+      <div class="outfit-image"><img src="cloth.jpg" alt="Example Image" width="240" height="240"></div>
+      <p class="outfit-recommendation">根据以上天气情况，适合穿着轻薄的上衣搭配长裤或短裙，如白色T恤搭配灰色高腰短裙，裙子的长度要适中，不要过短或过长。可以搭配浅色系的球鞋或休闲鞋，如白色或米色的球鞋。另外，可以选择黄色系的配饰或单品来凸显自己的喜好，如黄色的腰带或黄色的耳环。在这种温度下可以选择搭配一件薄外套，如牛仔外套或短款夹克，以防止天气变化导致的寒意。</p>
+      <p class="outfit-recommendation"><a href="https://www.taobao.com">点击这里购买同款穿搭</a></p>
+    </div>
+  </div>
+  <script type="text/javascript">
+    // 定义一个名为initWeather的函数，用于初始化天气查询
+    function initWeather(adcode) {
+      // 加载天气查询插件
+      AMap.plugin('AMap.Weather', function() {
+        // 创建天气查询实例
+        var weather = new AMap.Weather();
+
+        // 获取实时天气信息
+        weather.getLive(adcode, function(err, data) {
+          if (!err) {
+            var weatherInfo = "城市名称：" + data.province + data.city + "<br>" +
+                                    "天气：" + data.weather + "<br>" +
+                                    "温度：" + data.temperature + "℃<br>" +
+                                    "风向：" + data.windDirection + "<br>" +
+                                    "风速：" + data.windPower+ "km/h<br>" +
+                                    "湿度：" + data.humidity + "%<br>" +
+                                    "更新时间：" + data.reportTime;
+
+            document.getElementById("weatherInfo").innerHTML = weatherInfo;
+          } else {
+            console.log(err);
+          }
+        });
+      });
+    }
+
+    // 获取当前位置对应的城市和区域编码
+    function getLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+          // 获取经纬度信息
+          var longitude = position.coords.longitude;
+          var latitude = position.coords.latitude;
+
+          // 调用逆地理编码方法，获取当前位置对应的区域编码
+          AMap.service('AMap.Geocoder', function() {
+            var geocoder = new AMap.Geocoder({
+              radius: 1000,
+              extensions: 'all'
+            });
+
+            geocoder.getAddress([longitude, latitude], function(status, result) {
+              if (status === 'complete' && result.regeocode) {
+                var adcode = result.regeocode.addressComponent.adcode; // 获取区域编码
+                initWeather(adcode); // 调用initWeather方法获取天气信息
+              } else {
+                console.log('获取区域编码失败！');
+              }
+            });
+          });
+        }, function() {
+          console.log('获取位置信息失败！');
+        });
+      } else {
+        console.log('该浏览器不支持获取位置信息！');
+      }
+    }
+
+    getLocation(); // 自动执行getLocation方法获取位置信息和天气情况
+  </script>
+</body>
+</html>
